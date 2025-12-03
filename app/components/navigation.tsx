@@ -18,13 +18,13 @@ export default function Navigation({ user }: NavigationProps) {
   const pathname = usePathname()
 
   const baseNavItems = [
-    { name: "Discovery", href: "/discovery", icon: MapPin },
+    // { name: "Discovery", href: "/discovery", icon: MapPin },
     { name: "Trip", href: "/trip", icon: MapPin },
     { name: "Wishlist", href: "/wishlist", icon: Heart },
-    { name: "Hotel", href: "/hotel", icon: Hotel },
-    { name: "Buddies", href: "/buddies", icon: UserCheck },
+    // { name: "Hotel", href: "/hotel", icon: Hotel },
+    // { name: "Buddies", href: "/buddies", icon: UserCheck },
     { name: "Profile", href: "/profile", icon: User },
-    { name: "Textbud", href: "/chat", icon: MessageCircleHeart },
+    // { name: "Textbud", href: "/chat", icon: MessageCircleHeart },
   ]
 
   // Add Community for premium users
