@@ -1,0 +1,540 @@
+
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "mongodb"
+//   url      = env("DATABASE_URL")
+// }
+
+// model User {
+//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+//   email     String   @unique
+//   name      String
+//   password  String
+//   type      UserType @default(CUSTOMER)
+//   isPremium Boolean  @default(false)
+//   phone     String?
+//   interests String?
+//   avatar    String?
+//   location  String?
+//   bio       String?
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // Relations
+//   blogs         Blog[] @relation("BlogAuthor")
+//   trips         Trip[] @relation("TripCreator")
+//   tripParticipants TripParticipant[]
+//   todoItems     TodoItem[]
+//   wishlists     Wishlist[]
+//   likes         Like[]
+//   buddyRequests BuddyRequest[] @relation("BuddyRequester")
+//   buddyReceived BuddyRequest[] @relation("BuddyReceiver")
+//   reviews       Review[]
+//   receivedReviews Review[] @relation("UserReviews") // Added relation for received reviews
+//   groups        Group[] @relation("GroupCreator")
+//   groupPosts    GroupPost[] @relation("GroupPostAuthor")
+
+//   @@map("users")
+// }
+
+// model Blog {
+//   id          String   @id @default(auto()) @map("_id") @db.ObjectId
+//   title       String
+//   content     String
+//   preview     String
+//   location    String?
+//   tags        String[]
+//   images      String[]
+//   publishDate DateTime @default(now())
+//   authorId    String   @db.ObjectId
+//   isPremium   Boolean  @default(false) // For community posts
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+
+//   // Relations
+//   author    User       @relation("BlogAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+//   likes     Like[]
+//   wishlists Wishlist[]
+
+//   @@map("blogs")
+// }
+
+// model Trip {
+//   id              String     @id @default(auto()) @map("_id") @db.ObjectId
+//   destination     String
+//   startDate       DateTime
+//   endDate         DateTime
+//   budget          String
+//   description     String?
+//   isPublic        Boolean    @default(true)
+//   maxParticipants Int        @default(6)
+//   status          TripStatus @default(OPEN) // Added trip status field
+//   creatorId       String     @db.ObjectId
+//   createdAt       DateTime   @default(now())
+//   updatedAt       DateTime   @updatedAt
+
+//   // Relations
+//   creator      User              @relation("TripCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+//   participants TripParticipant[]
+//   todoItems    TodoItem[]
+//   reviews      Review[]
+
+//   @@map("trips")
+// }
+
+// model TripParticipant {
+//   id       String          @id @default(auto()) @map("_id") @db.ObjectId
+//   userId   String          @db.ObjectId
+//   tripId   String          @db.ObjectId
+//   role     ParticipantRole @default(PARTICIPANT)
+//   joinedAt DateTime        @default(now())
+
+//   // Relations
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+//   @@unique([userId, tripId])
+//   @@map("trip_participants")
+// }
+
+// model TodoItem {
+//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+//   text      String
+//   completed Boolean  @default(false)
+//   tripId    String   @db.ObjectId
+//   createdBy String   @db.ObjectId
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // Relations
+//   trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+//   user User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+//   @@map("todo_items")
+// }
+
+// model Wishlist {
+//   id      String   @id @default(auto()) @map("_id") @db.ObjectId
+//   userId  String   @db.ObjectId
+//   blogId  String   @db.ObjectId
+//   addedAt DateTime @default(now())
+
+//   // Relations
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+//   @@unique([userId, blogId])
+//   @@map("wishlists")
+// }
+
+// model Like {
+//   id      String   @id @default(auto()) @map("_id") @db.ObjectId
+//   userId  String   @db.ObjectId
+//   blogId  String   @db.ObjectId
+//   likedAt DateTime @default(now())
+
+//   // Relations
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+//   @@unique([userId, blogId])
+//   @@map("likes")
+// }
+
+// model BuddyRequest {
+//   id          String      @id @default(auto()) @map("_id") @db.ObjectId
+//   requesterId String      @db.ObjectId
+//   receiverId  String      @db.ObjectId
+//   status      BuddyStatus @default(PENDING)
+//   createdAt   DateTime    @default(now())
+//   updatedAt   DateTime    @updatedAt
+
+//   // Relations
+//   requester User @relation("BuddyRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+//   receiver  User @relation("BuddyReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+//   @@unique([requesterId, receiverId])
+//   @@map("buddy_requests")
+// }
+
+
+
+// model Review {
+//   id             String     @id @default(auto()) @map("_id") @db.ObjectId
+//   userId         String     @db.ObjectId
+//   tripId         String?    @db.ObjectId
+//   reviewedUserId String?    @db.ObjectId
+//   rating         Int
+//   comment        String?
+//   reviewType     ReviewType
+//   createdAt      DateTime   @default(now())
+
+//   user         User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   trip         Trip? @relation(fields: [tripId], references: [id], onDelete: Cascade)
+//   reviewedUser User? @relation("UserReviews", fields: [reviewedUserId], references: [id], onDelete: Cascade)
+
+//   // Constraints
+//   @@unique([userId, tripId, reviewType], map: "unique_trip_review")                    // only one trip review per user
+//   @@unique([userId, reviewedUserId, tripId], map: "unique_buddy_review")   // only one buddy review per trip per user
+
+//   @@map("reviews")
+// }
+
+
+
+
+
+// model Group {
+//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+//   name      String   @unique
+//   creatorId String   @db.ObjectId
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // Relations
+//   creator User        @relation("GroupCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+//   posts   GroupPost[]
+
+//   @@map("groups")
+// }
+
+// model GroupPost {
+//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+//   title     String
+//   content   String
+//   location  String?
+//   postDate  DateTime @default(now())
+//   authorId  String   @db.ObjectId
+//   groupId   String   @db.ObjectId
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   // Relations
+//   author User  @relation("GroupPostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+//   group  Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+//   @@map("group_posts")
+// }
+
+// enum UserType {
+//   ADMIN
+//   CUSTOMER
+// }
+
+// enum ParticipantRole {
+//   CREATOR
+//   PARTICIPANT
+// }
+
+// enum BuddyStatus {
+//   PENDING
+//   ACCEPTED
+//   REJECTED
+// }
+
+// enum ReviewType {
+//   DESTINATION
+//   BUDDY
+//   TRIP
+// }
+
+// enum TripStatus {
+//   OPEN
+//   ONGOING
+//   ENDED
+// }
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String            @id @default(auto()) @map("_id") @db.ObjectId
+  email                String            @unique
+  name                 String
+  password             String
+  type                 UserType          @default(CUSTOMER)
+  isPremium            Boolean           @default(false)
+  phone                String?
+  interests            String?
+  avatar               String?
+  location             String?
+  bio                  String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  blogs                Blog[]            @relation("BlogAuthor")
+  trips                Trip[]            @relation("TripCreator")
+  tripParticipants     TripParticipant[]
+  todoItems            TodoItem[]
+  wishlists            Wishlist[]
+  likes                Like[]
+  buddyRequests        BuddyRequest[]    @relation("BuddyRequester")
+  buddyReceived        BuddyRequest[]    @relation("BuddyReceiver")
+  groups               Group[]           @relation("GroupCreator")
+  groupPosts           GroupPost[]       @relation("GroupPostAuthor")
+
+  tripReviewsAuthored  TripReview[]
+  buddyReviewsAuthored BuddyReview[]     @relation("ReviewerBuddyReviews")
+  buddyReviewsReceived BuddyReview[]     @relation("BuddyBeingReviewed")
+
+  chatMemberships ChatMember[]
+  messagesSent     Message[]
+
+
+  @@map("users")
+}
+
+model Blog {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  content     String
+  preview     String
+  location    String?
+  tags        String[]
+  images      String[]
+  publishDate DateTime @default(now())
+  authorId    String   @db.ObjectId
+  isPremium   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author    User       @relation("BlogAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  likes     Like[]
+  wishlists Wishlist[]
+
+  @@map("blogs")
+}
+
+model Trip {
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  destination     String
+  startDate       DateTime
+  endDate         DateTime
+  budget          String
+  description     String?
+  isPublic        Boolean    @default(true)
+  maxParticipants Int        @default(6)
+  status          TripStatus @default(OPEN)
+  creatorId       String     @db.ObjectId
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  creator      User              @relation("TripCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  participants TripParticipant[]
+  todoItems    TodoItem[]
+
+  tripReviews  TripReview[]
+  buddyReviews BuddyReview[]
+
+  @@map("trips")
+}
+
+model TripParticipant {
+  id       String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId   String          @db.ObjectId
+  tripId   String          @db.ObjectId
+  role     ParticipantRole @default(PARTICIPANT)
+  joinedAt DateTime        @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tripId])
+  @@map("trip_participants")
+}
+
+model TodoItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  text      String
+  completed Boolean  @default(false)
+  tripId    String   @db.ObjectId
+  createdBy String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@map("todo_items")
+}
+
+model Wishlist {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String   @db.ObjectId
+  blogId  String   @db.ObjectId
+  addedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blogId])
+  @@map("wishlists")
+}
+
+model Like {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String   @db.ObjectId
+  blogId  String   @db.ObjectId
+  likedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blogId])
+  @@map("likes")
+}
+
+model BuddyRequest {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  requesterId String      @db.ObjectId
+  receiverId  String      @db.ObjectId
+  status      BuddyStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  requester User @relation("BuddyRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver  User @relation("BuddyReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, receiverId])
+  @@map("buddy_requests")
+}
+
+model Group {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  creatorId String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator User        @relation("GroupCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  posts   GroupPost[]
+
+  @@map("groups")
+}
+
+model GroupPost {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   String
+  location  String?
+  postDate  DateTime @default(now())
+  authorId  String   @db.ObjectId
+  groupId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author User  @relation("GroupPostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  group  Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("group_posts")
+}
+
+model TripReview {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  tripId     String   @db.ObjectId
+  reviewerId String   @db.ObjectId
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  trip     Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  reviewer User @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@unique([tripId, reviewerId])
+  @@map("trip_reviews")
+}
+
+model BuddyReview {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  tripId     String   @db.ObjectId
+  reviewerId String   @db.ObjectId
+  buddyId    String   @db.ObjectId
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  trip     Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  reviewer User @relation("ReviewerBuddyReviews", fields: [reviewerId], references: [id], onDelete: Cascade)
+  buddy    User @relation("BuddyBeingReviewed",   fields: [buddyId],    references: [id], onDelete: Cascade)
+
+  @@unique([tripId, reviewerId, buddyId])
+  @@index([tripId, reviewerId])
+  @@map("buddy_reviews")
+}
+
+model Chat {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  name      String?
+  isGroup   Boolean       @default(false)
+  members   ChatMember[]
+  messages  Message[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ChatMember {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  chatId    String   @db.ObjectId
+  userId    String   @db.ObjectId
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([chatId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  chatId    String   @db.ObjectId
+  senderId  String   @db.ObjectId
+  content   String
+  createdAt DateTime @default(now())
+
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, createdAt])
+}
+
+
+enum UserType {
+  ADMIN
+  CUSTOMER
+}
+
+enum ParticipantRole {
+  CREATOR
+  PARTICIPANT
+}
+
+enum BuddyStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum ReviewType {
+  DESTINATION
+  BUDDY
+  TRIP
+}
+
+enum TripStatus {
+  OPEN
+  ONGOING
+  ENDED
+}
