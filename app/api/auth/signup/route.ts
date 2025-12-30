@@ -1,10 +1,8 @@
 
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { SignJWT } from 'jose';
-
-const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
@@ -64,17 +62,17 @@ export async function POST(request: Request) {
       type: user.type,
       isPremium: user.isPremium
     })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setExpirationTime('7d')
-    .sign(new TextEncoder().encode(process.env.JWT_SECRET));
+      .setProtectedHeader({ alg: 'HS256' })
+      .setExpirationTime('7d')
+      .sign(new TextEncoder().encode(process.env.JWT_SECRET));
 
-    const response = NextResponse.json({ 
+    const response = NextResponse.json({
       user,
       token,
       message: 'User created successfully',
-      success: true 
+      success: true
     });
-    
+
     // Set the auth cookie
     response.cookies.set({
       name: 'auth-token',
@@ -94,7 +92,5 @@ export async function POST(request: Request) {
       { error: 'Internal server error' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

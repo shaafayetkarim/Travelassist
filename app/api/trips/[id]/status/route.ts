@@ -1,8 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "@/lib/prisma"
 import { verifyJWT } from "@/lib/jwt"
-
-const prisma = new PrismaClient()
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -32,7 +30,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       return NextResponse.json({ error: "Trip not found" }, { status: 404 })
     }
 
-    
+
     // Update trip status
     const updatedTrip = await prisma.trip.update({
       where: { id: params.id },
