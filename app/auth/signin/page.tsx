@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -19,7 +20,7 @@ export default function SignIn() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-    setError("") // Clear error when user types
+    setError("")
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +34,10 @@ export default function SignIn() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       })
 
       const data = await response.json()
@@ -44,9 +48,29 @@ export default function SignIn() {
         return
       }
 
-      // Store token and user data in localStorage
-      localStorage.setItem("auth-token", data.token)
-      localStorage.setItem("user", JSON.stringify(data.user))
+      // Store user info in localStorage for client-side access
+      // The JWT token is automatically stored in httpOnly cookie by the API
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.name,
+          type: data.user.type,
+          isPremium: data.user.isPremium,
+          phone: data.user.phone,
+          interests: data.user.interests,
+          avatar: data.user.avatar,
+          location: data.user.location,
+          bio: data.user.bio,
+        })
+      )
+
+      // Store token in localStorage as well for API calls
+      if (data.token) {
+        localStorage.setItem("token", data.token)
+      }
+      console.log(data.token);
 
       // Redirect based on user type
       if (data.user.type === "ADMIN") {
@@ -54,11 +78,15 @@ export default function SignIn() {
       } else {
         window.location.href = "/discovery"
       }
+
     } catch (error) {
+      console.error("Signin error:", error)
       setError("Network error. Please try again.")
+    } finally {
       setIsLoading(false)
     }
   }
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -67,7 +95,7 @@ export default function SignIn() {
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">Sign in to Travel Buddy</h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{" "}
-            <Link href="/auth/signup" className="font-medium text-primary-600 hover:text-primary-500">
+            <Link href="/auth/signup" className="font-medium text-blue-600 hover:text-blue-500">
               create a new account
             </Link>
           </p>
@@ -95,7 +123,7 @@ export default function SignIn() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter your email"
                 />
               </div>
@@ -114,7 +142,7 @@ export default function SignIn() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter your password"
                 />
               </div>
@@ -125,7 +153,7 @@ export default function SignIn() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors disabled:opacity-50"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
