@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { jwtVerify } from "jose"
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
   try {
     // Get current user from Authorization header
@@ -28,11 +30,11 @@ export async function GET(request: Request) {
           { type: "CUSTOMER" },
           search
             ? {
-                OR: [
-                  { name: { contains: search, mode: "insensitive" } },
-                  { email: { contains: search, mode: "insensitive" } },
-                ],
-              }
+              OR: [
+                { name: { contains: search, mode: "insensitive" } },
+                { email: { contains: search, mode: "insensitive" } },
+              ],
+            }
             : {},
           filter === "premium" ? { isPremium: true } : filter === "regular" ? { isPremium: false } : {},
         ],
