@@ -61,16 +61,12 @@ export default function Wishlist() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="animate-pulse space-y-8">
+          <div className="h-10 bg-white/5 rounded-2xl w-1/4 border border-white/10"></div>
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow-sm border p-6">
-                <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
-                <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-              </div>
+              <div key={i} className="glass-card h-40 animate-pulse" />
             ))}
           </div>
         </div>
@@ -80,13 +76,10 @@ export default function Wishlist() {
 
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center py-16">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={fetchWishlist}
-            className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-          >
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="glass-card text-center py-16 flex flex-col items-center gap-6">
+          <p className="text-red-400 font-medium">{error}</p>
+          <button onClick={fetchWishlist} className="glass-button bg-primary text-white border-primary/20">
             Try Again
           </button>
         </div>
@@ -95,41 +88,55 @@ export default function Wishlist() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Wishlist</h1>
+    <div className="max-w-4xl mx-auto px-4 py-12">
+      <h1 className="text-4xl font-extrabold tracking-tight text-gradient mb-12">Your Wishlist</h1>
 
       {items.length === 0 ? (
-        <div className="text-center py-16">
-          <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-600 mb-2">Your wishlist is empty</h2>
-          <p className="text-gray-500 mb-4">Start adding travel blogs to your wishlist from Discovery!</p>
+        <div className="glass-card py-20 text-center flex flex-col items-center gap-6">
+          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
+            <Heart className="w-10 h-10 text-white/20" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold">Your wishlist is empty</h2>
+            <p className="text-white/40 max-w-xs mx-auto">Start adding travel stories to your collection from Discovery.</p>
+          </div>
           <Link
             href="/discovery"
-            className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors inline-block"
+            className="glass-button bg-primary text-white border-primary/20 shadow-lg shadow-primary/20"
           >
-            Explore Blogs
+            Explore Stories
           </Link>
         </div>
       ) : (
         <div className="grid gap-6">
           {items.map((item) => (
-            <div key={item.id} className="bg-white rounded-lg shadow-sm border p-6">
-              <div className="flex justify-between items-start mb-3">
+            <div key={item.id} className="glass-card group hover:bg-white/10 transition-all duration-500">
+              <div className="flex justify-between items-start mb-4">
                 <Link href={`/blog/${item.id}`} className="flex-1">
-                  <h2 className="text-xl font-semibold text-gray-900 hover:text-primary-600 transition-colors">
+                  <h2 className="text-xl font-bold group-hover:text-primary transition-colors leading-tight">
                     {item.title}
                   </h2>
                 </Link>
                 <button
                   onClick={() => removeFromWishlist(item.id)}
-                  className="text-gray-400 hover:text-red-500 transition-colors ml-4"
+                  className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/20 hover:text-red-400 hover:bg-red-500/10 border border-white/10 hover:border-red-500/20 transition-all"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-gray-600 mb-4">{item.preview}</p>
-              {item.location && <p className="text-sm text-gray-500 mb-4">📍 {item.location}</p>}
-              <div className="text-sm text-gray-500">Added on {new Date(item.addedDate).toLocaleDateString()}</div>
+              <p className="text-white/60 mb-6 line-clamp-2 leading-relaxed">{item.preview}</p>
+
+              <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                {item.location && (
+                  <span className="text-[10px] uppercase tracking-widest font-bold text-white/40 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
+                    {item.location}
+                  </span>
+                )}
+                <div className="text-[10px] uppercase tracking-widest font-bold text-white/20">
+                  Added {new Date(item.addedDate).toLocaleDateString()}
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -137,3 +144,4 @@ export default function Wishlist() {
     </div>
   )
 }
+

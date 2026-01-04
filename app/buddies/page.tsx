@@ -215,25 +215,16 @@ export default function Buddies() {
   if (
     loading &&
     currentBuddies.length === 0 &&
-    pendingRequests.incoming.length === 0 &&
-    pendingRequests.outgoing.length === 0
+    (pendingRequests?.incoming?.length || 0) === 0 &&
+    (pendingRequests?.outgoing?.length || 0) === 0
   ) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="animate-pulse space-y-8">
+          <div className="h-10 bg-white/5 rounded-2xl w-1/4 border border-white/10"></div>
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow-sm border p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-20 h-20 bg-gray-200 rounded-full"></div>
-                  <div className="flex-1">
-                    <div className="h-6 bg-gray-200 rounded w-1/2 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                  </div>
-                </div>
-              </div>
+              <div key={i} className="glass-card h-40 animate-pulse" />
             ))}
           </div>
         </div>
@@ -243,179 +234,163 @@ export default function Buddies() {
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="text-center py-16">
-          <p className="text-red-600 mb-4">{error}</p>
-          <Button
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <div className="glass-card text-center py-16 flex flex-col items-center gap-6">
+          <p className="text-red-400 font-medium">{error}</p>
+          <button
             onClick={() => {
               if (activeTab === "find") fetchAvailableBuddies()
               else if (activeTab === "my-buddies") fetchMyBuddies()
               else fetchPendingRequests()
             }}
-            className="bg-black text-white"
+            className="glass-button bg-primary text-white border-primary/20"
           >
             Try Again
-          </Button>
+          </button>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Travel Buddies</h1>
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      <h1 className="text-4xl font-extrabold tracking-tight text-gradient mb-12">Travel Buddies</h1>
 
-      <div className="mb-8">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTab("find")}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "find"
-                  ? "border-primary-500 text-primary-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+      <div className="mb-12">
+        <div className="bg-white/5 p-1 rounded-2xl border border-white/10 flex gap-2 w-fit">
+          {[
+            { id: "find", label: "Find Buddies" },
+            { id: "my-buddies", label: "My Buddies" },
+            { id: "requests", label: "Requests", count: pendingRequests?.incoming?.length },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-6 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${activeTab === tab.id
+                ? "bg-white/10 text-white shadow-lg"
+                : "text-white/40 hover:text-white hover:bg-white/5"
+                }`}
             >
-              Find Buddies
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTab("my-buddies")}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "my-buddies"
-                  ? "border-primary-500 text-primary-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              My Buddies
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTab("requests")}
-              className={`py-2 px-1 border-b-2 font-medium text-sm relative ${
-                activeTab === "requests"
-                  ? "border-primary-500 text-primary-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              Requests
-              {pendingRequests?.incoming?.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {pendingRequests.incoming.length}
+              {tab.label}
+              {(tab.count ?? 0) > 0 && (
+                <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                  {tab.count}
                 </span>
               )}
-            </Button>
-          </nav>
+            </button>
+          ))}
         </div>
       </div>
 
       {activeTab === "find" && (
-        <div>
-          <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Find Your Perfect Travel Buddy</h2>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="glass-card mb-12">
+            <h2 className="text-xl font-bold mb-8 flex items-center gap-2">
+              <Sparkles className="text-primary w-5 h-5" />
+              Find Your Expert Duo
+            </h2>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="flex space-x-2">
-                  <Button
-                    variant={searchMode === "match" ? "default" : "outline"}
-                    size="sm"
-                    onClick={handleMatchmaking}
-                    className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    <span> Matchmaking</span>
-                  </Button>
-                </div>
+            <div className="space-y-6">
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={handleMatchmaking}
+                  className={`glass-button text-sm ${searchMode === "match" ? "bg-primary text-white border-primary/20" : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10"}`}
+                >
+                  <Sparkles className={`w-4 h-4 ${searchMode === "match" ? "text-white" : "text-primary"}`} />
+                  AI Matchmaking
+                </button>
+                {searchMode === "match" && (
+                  <button onClick={resetToNameSearch} className="text-xs font-bold text-white/20 hover:text-white transition-colors">
+                    Reset Filter
+                  </button>
+                )}
               </div>
 
               {searchMode === "name" && (
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input
+                <div className="relative group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5 group-focus-within:text-primary transition-colors" />
+                  <input
                     type="text"
-                    placeholder="Search by name ?"
+                    placeholder="Search by name..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3"
+                    className="glass-input w-full pl-12 h-14"
                   />
                 </div>
               )}
 
               {searchMode === "match" && (
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Sparkles className="w-5 h-5 text-purple-600" />
-                    <span className="font-medium text-purple-900">Matchmaking Active</span>
-                  </div>
-                  <p className="text-sm text-purple-700">
-                    Buddies are sorted by compatibility based on your likes and wishlist.                  </p>
+                <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20 animate-in zoom-in-95">
+                  <p className="text-xs text-primary-400 font-medium flex items-center gap-2">
+                    <Sparkles className="w-3 h-3" />
+                    Buddies sorted by compatibility based on your travel interests.
+                  </p>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-end mb-8">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {searchMode === "match" ? "Best Matches for You" : "Available Travel Buddies"}
+              <h3 className="text-lg font-bold">
+                {searchMode === "match" ? "Highly Compatible" : "Nearby Explorers"}
               </h3>
-              <p className="text-sm text-gray-600">
-                {availableBuddies.length} {availableBuddies.length === 1 ? "buddy" : "buddies"} found
-                {searchTerm && ` for "${searchTerm}"`}
+              <p className="text-xs text-white/40 uppercase tracking-widest mt-1">
+                {availableBuddies.length} Potential Partners Found
               </p>
             </div>
-            {searchMode === "match" && <div className="text-sm text-gray-500">Sorted by compatibility score</div>}
           </div>
 
-          <div className="grid gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {availableBuddies.map((buddy) => (
               <div
                 key={buddy.id}
-                className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow"
+                className="glass-card group hover:bg-white/10 transition-all duration-500"
               >
-                <div className="flex items-start space-x-4">
-                  
+                <div className="flex items-start gap-6">
+                  <div className="relative">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center border border-white/10 overflow-hidden">
+                      <Users className="w-8 h-8 text-white/20" />
+                    </div>
+                    {searchMode === "match" && buddy.isMatch && (
+                      <div className="absolute -bottom-2 -left-2 bg-primary text-[8px] font-black uppercase tracking-tighter px-2 py-1 rounded-lg shadow-xl animate-bounce">
+                        Match!
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <h3 className="text-xl font-semibold text-gray-900 flex items-center space-x-2">
-                          <span>{buddy.name}</span>
-                          {searchMode === "match" && buddy.isMatch && (
-                            <span className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs font-medium px-2 py-1 rounded-full">
-                              It's a match!
-                            </span>
-                          )}
+                        <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
+                          {buddy.name}
                         </h3>
-                        <div className="flex items-center text-gray-600 mt-1">
-                          <MapPin className="w-4 h-4 mr-1" />
+                        <div className="flex items-center text-white/40 text-xs mt-1">
+                          <MapPin className="w-3 h-3 mr-1 text-primary" />
                           {buddy.location}
                         </div>
                       </div>
-                      
                     </div>
 
-                    <p className="text-gray-600 mb-4">{buddy.tripsCompleted} trips completed</p>
+                    <p className="text-white/40 text-xs font-bold uppercase tracking-[0.2em] mb-4">
+                      {buddy.tripsCompleted} Expeditions Completed
+                    </p>
 
-                    <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="flex flex-wrap gap-2 mb-6">
                       {buddy.interests.map((interest) => (
-                        <span key={interest} className="bg-primary-100 text-primary-700 text-sm px-3 py-1 rounded-full">
+                        <span key={interest} className="text-[10px] font-bold text-primary/80 bg-primary/10 px-2 py-1 rounded-lg border border-primary/20">
                           {interest}
                         </span>
                       ))}
                     </div>
 
-                    <div className="flex space-x-3">
-                      <Button
-                        onClick={() => handleConnect(buddy.id)}
-                        className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center space-x-2"
-                      >
-                        <UserPlus className="w-4 h-4" />
-                        <span>Connect</span>
-                      </Button>
-                      
-                    </div>
+                    <button
+                      onClick={() => handleConnect(buddy.id)}
+                      className="glass-button bg-primary text-white border-primary/20 w-full h-11"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      Connect
+                    </button>
                   </div>
                 </div>
               </div>
@@ -423,77 +398,69 @@ export default function Buddies() {
           </div>
 
           {availableBuddies.length === 0 && !loading && (
-            <div className="text-center py-16">
-              <div className="text-gray-500 mb-4">
-                <Search className="w-16 h-16 mx-auto mb-4" />
+            <div className="glass-card py-20 text-center flex flex-col items-center gap-6">
+              <Search className="w-12 h-12 text-white/10" />
+              <div>
+                <h3 className="text-xl font-bold">No buddies found</h3>
+                <p className="text-white/40 text-sm">Try broadening your search or use AI matchmaking.</p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No buddies found</h3>
-              <p className="text-gray-500 mb-4">
-                Try adjusting your search terms or use AI matchmaking to find compatible travel partners.
-              </p>
-              <Button
+              <button
                 onClick={handleMatchmaking}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                className="glass-button bg-primary text-white border-primary/20"
               >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Try AI Matchmaking
-              </Button>
+                <Sparkles className="w-4 h-4" />
+                Try AI Matching
+              </button>
             </div>
           )}
         </div>
       )}
 
       {activeTab === "my-buddies" && (
-        <div>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           {myBuddies.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-gray-500 mb-4">
-                <Users className="w-16 h-16 mx-auto mb-4" />
+            <div className="glass-card py-20 text-center flex flex-col items-center gap-6">
+              <Users className="w-12 h-12 text-white/10" />
+              <div>
+                <h3 className="text-xl font-bold">Forge New Connections</h3>
+                <p className="text-white/40 text-sm">Start building your network of elite travelers.</p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No buddies yet</h3>
-              <p className="text-gray-500 mb-4">Start connecting with other travelers to build your buddy network!</p>
-              <Button
+              <button
                 onClick={() => setActiveTab("find")}
-                className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                className="glass-button bg-primary text-white border-primary/20"
               >
                 Find Buddies
-              </Button>
+              </button>
             </div>
           ) : (
-            <div className="grid gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {myBuddies.map((buddy) => (
                 <div
                   key={buddy.id}
-                  className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow"
+                  className="glass-card group hover:bg-white/10 transition-all duration-500"
                 >
-                  <div className="flex items-start space-x-4">
-                   
+                  <div className="flex items-start gap-6">
+                    <div className="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
+                      <Users className="w-8 h-8 text-white/20" />
+                    </div>
                     <div className="flex-1">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h3 className="text-xl font-semibold text-gray-900">{buddy.name}</h3>
-                          <div className="flex items-center text-gray-600 mt-1">
-                            <MapPin className="w-4 h-4 mr-1" />
-                            {buddy.location}
-                          </div>
-                        </div>
-                        
+                      <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{buddy.name}</h3>
+                      <div className="flex items-center text-white/40 text-xs mt-1">
+                        <MapPin className="w-3 h-3 mr-1 text-primary" />
+                        {buddy.location}
                       </div>
 
-                      <p className="text-gray-600 mb-4">{buddy.tripsCompleted} trips completed</p>
+                      <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-4 mb-4">
+                        {buddy.tripsCompleted} Trips Together
+                      </p>
 
-                      <div className="flex flex-wrap gap-2 mb-4">
+                      <div className="flex flex-wrap gap-2">
                         {buddy.interests.map((interest) => (
-                          <span
-                            key={interest}
-                            className="bg-primary-100 text-primary-700 text-sm px-3 py-1 rounded-full"
-                          >
+                          <span key={interest} className="text-[10px] font-bold text-white/60 bg-white/5 px-2 py-1 rounded-lg border border-white/10">
                             {interest}
                           </span>
                         ))}
                       </div>
-
-                     
                     </div>
                   </div>
                 </div>
@@ -504,68 +471,42 @@ export default function Buddies() {
       )}
 
       {activeTab === "requests" && (
-        <div className="space-y-8">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-12">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-              <Clock className="w-5 h-5 mr-2" />
-              Incoming Requests ({pendingRequests?.incoming?.length || 0})
+            <h2 className="text-xl font-bold mb-8 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-primary" />
+              Incoming Requests
+              <span className="text-xs text-white/20 font-bold ml-2">({pendingRequests?.incoming?.length || 0})</span>
             </h2>
-            {pendingRequests.incoming === null ? (
-              <div className="bg-gray-50 rounded-lg p-8 text-center">
-                <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No incoming buddy requests</p>
+            {(!pendingRequests.incoming || pendingRequests.incoming.length === 0) ? (
+              <div className="glass-card py-16 text-center text-white/20 text-sm italic">
+                No new expedition requests
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {pendingRequests.incoming.map((request) => (
-                  <div key={request.id} className="bg-white rounded-lg shadow-sm border p-6">
-                    <div className="flex items-start space-x-4">
-                      
+                  <div key={request.id} className="glass-card group">
+                    <div className="flex items-start gap-6">
+                      <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
+                        <Users className="w-6 h-6 text-white/20" />
+                      </div>
                       <div className="flex-1">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">{request.user.name}</h3>
-                            <div className="flex items-center text-gray-600 mt-1">
-                              <MapPin className="w-4 h-4 mr-1" />
-                              {request.user.location}
-                            </div>
-                          </div>
-                          
-                        </div>
+                        <h3 className="text-lg font-bold">{request.user.name}</h3>
+                        <p className="text-xs text-white/40 mt-1">{request.user.location}</p>
 
-                        <p className="text-gray-600 mb-3">{request.user.tripsCompleted} trips completed</p>
-
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {request.user.interests.map((interest) => (
-                            <span
-                              key={interest}
-                              className="bg-primary-100 text-primary-700 text-sm px-3 py-1 rounded-full"
-                            >
-                              {interest}
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="flex space-x-3">
-                          <Button
+                        <div className="flex gap-2 mt-6">
+                          <button
                             onClick={() => handleRequestAction(request.id, "accept")}
-                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+                            className="flex-1 h-10 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl text-xs font-bold hover:bg-green-500 transition-all hover:text-white"
                           >
-                            <Check className="w-4 h-4" />
-                            <span>Accept</span>
-                          </Button>
-                          <Button
+                            Accept
+                          </button>
+                          <button
                             onClick={() => handleRequestAction(request.id, "decline")}
-                            variant="outline"
-                            className="border-red-300 text-red-600 hover:bg-red-50 bg-transparent flex items-center space-x-2"
+                            className="flex-1 h-10 bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold hover:bg-red-500 transition-all hover:text-white"
                           >
-                            <X className="w-4 h-4" />
-                            <span>Decline</span>
-                          </Button>
-                          <Button variant="outline" className="flex items-center border border-gray-300 bg-transparent">
-                            <MessageCircle className="w-4 h-4 mr-2" />
-                            Message
-                          </Button>
+                            Decline
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -576,60 +517,37 @@ export default function Buddies() {
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-              <UserPlus className="w-5 h-5 mr-2" />
-              Sent Requests ({pendingRequests.outgoing.length})
+            <h2 className="text-xl font-bold mb-8 flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-primary" />
+              Sent Requests
+              <span className="text-xs text-white/20 font-bold ml-2">({pendingRequests.outgoing.length})</span>
             </h2>
             {pendingRequests.outgoing.length === 0 ? (
-              <div className="bg-gray-50 rounded-lg p-8 text-center">
-                <UserPlus className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No outgoing buddy requests</p>
+              <div className="glass-card py-16 text-center text-white/20 text-sm italic">
+                You haven't sent any requests yet.
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {pendingRequests.outgoing.map((request) => (
-                  <div key={request.id} className="bg-white rounded-lg shadow-sm border p-6">
-                    <div className="flex items-start space-x-4">
-                      
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="text-xl font-semibold text-gray-900">{request.user.name}</h3>
-                            <div className="flex items-center text-gray-600 mt-1">
-                              <MapPin className="w-4 h-4 mr-1" />
-                              {request.user.location}
-                            </div>
+                  <div key={request.id} className="glass-card opacity-80">
+                    <div className="flex items-start gap-6">
+                      <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
+                        <Users className="w-6 h-6 text-white/20" />
+                      </div>
+                      <div className="flex-1 flex justify-between items-center">
+                        <div>
+                          <h3 className="text-lg font-bold">{request.user.name}</h3>
+                          <div className="flex items-center gap-2 text-amber-400 text-[10px] font-bold uppercase tracking-widest mt-1">
+                            <Clock className="w-3 h-3" />
+                            Pending Response
                           </div>
-                          
                         </div>
-
-                        <p className="text-gray-600 mb-3">{request.user.tripsCompleted} trips completed</p>
-
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {request.user.interests.map((interest) => (
-                            <span
-                              key={interest}
-                              className="bg-primary-100 text-primary-700 text-sm px-3 py-1 rounded-full"
-                            >
-                              {interest}
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center text-amber-600">
-                            <Clock className="w-4 h-4 mr-2" />
-                            <span className="text-sm">Request pending</span>
-                          </div>
-                          <Button
-                            onClick={() => handleRequestAction(request.id, "cancel")}
-                            variant="outline"
-                            className="border-gray-300 text-gray-600 hover:bg-gray-50 bg-transparent flex items-center space-x-2"
-                          >
-                            <UserMinus className="w-4 h-4" />
-                            <span>Cancel Request</span>
-                          </Button>
-                        </div>
+                        <button
+                          onClick={() => handleRequestAction(request.id, "cancel")}
+                          className="px-4 py-2 bg-white/5 hover:bg-red-500/10 hover:text-red-400 text-white/40 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all border border-white/5"
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -642,3 +560,4 @@ export default function Buddies() {
     </div>
   )
 }
+

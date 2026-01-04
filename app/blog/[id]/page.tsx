@@ -101,21 +101,11 @@ export default function BlogDetails() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/4 mb-6"></div>
-          <div className="bg-white rounded-lg shadow-sm border overflow-hidden mb-8">
-            <div className="w-full h-64 bg-gray-200"></div>
-            <div className="p-6">
-              <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/3 mb-6"></div>
-              <div className="flex space-x-4">
-                <div className="h-10 bg-gray-200 rounded w-20"></div>
-                <div className="h-10 bg-gray-200 rounded w-32"></div>
-              </div>
-            </div>
-          </div>
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="animate-pulse space-y-8">
+          <div className="h-6 bg-white/5 rounded-full w-32 border border-white/10"></div>
+          <div className="glass-card h-[400px]" />
+          <div className="glass-card h-96" />
         </div>
       </div>
     )
@@ -123,10 +113,10 @@ export default function BlogDetails() {
 
   if (error || !blog) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center py-16">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">{error || "Blog not found"}</h1>
-          <Link href="/discovery" className="text-primary-600 hover:text-primary-700">
+      <div className="max-w-4xl mx-auto px-4 py-20 text-center">
+        <div className="glass-card border-red-500/20 py-16">
+          <h1 className="text-3xl font-black tracking-tight mb-6">{error || "Chronicle Missing"}</h1>
+          <Link href="/discovery" className="glass-button bg-white text-black border-transparent px-8 h-12 inline-flex">
             Return to Discovery
           </Link>
         </div>
@@ -135,79 +125,99 @@ export default function BlogDetails() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-12">
       {/* Back button */}
-      <Link href="/discovery" className="inline-flex items-center text-primary-600 hover:text-primary-700 mb-6">
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Discovery
+      <Link href="/discovery" className="group inline-flex items-center text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-primary transition-colors mb-10">
+        <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+        Back to Exploration
       </Link>
 
       {/* Blog header */}
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden mb-8">
+      <div className="glass-card p-0 overflow-hidden mb-12 border-primary/10">
         {blog.images && blog.images[0] && (
-          <img src={blog.images[0] || "/placeholder.svg"} alt={blog.title} className="w-full h-64 object-cover" />
+          <div className="relative h-[400px] group">
+            <img src={blog.images[0] || "/placeholder.svg"} alt={blog.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-transparent to-transparent opacity-60" />
+
+            <div className="absolute bottom-8 left-8 right-8">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {blog.tags.map((tag) => (
+                  <span key={tag} className="bg-primary/20 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-primary/20">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">{blog.title}</h1>
+            </div>
+          </div>
         )}
 
-        <div className="p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">{blog.title}</h1>
+        <div className="p-8">
+          {!blog.images?.[0] && (
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-gradient mb-8 leading-tight">{blog.title}</h1>
+          )}
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
-            <div className="flex items-center">
-              <User className="w-4 h-4 mr-1" />
+          <div className="flex flex-wrap items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-10 pb-8 border-b border-white/5">
+            <div className="flex items-center group">
+              <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mr-3 group-hover:border-primary/50 transition-colors">
+                <User className="w-3.5 h-3.5 text-white/60" />
+              </div>
               {blog.author}
             </div>
             <div className="flex items-center">
-              <Calendar className="w-4 h-4 mr-1" />
-              {new Date(blog.publishDate).toLocaleDateString()}
+              <Calendar className="w-4 h-4 mr-2 text-primary" />
+              {new Date(blog.publishDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
             </div>
             {blog.location && (
               <div className="flex items-center">
-                <MapPin className="w-4 h-4 mr-1" />
+                <MapPin className="w-4 h-4 mr-2 text-secondary" />
                 {blog.location}
               </div>
             )}
           </div>
 
-          {blog.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
-              {blog.tags.map((tag) => (
-                <span key={tag} className="bg-primary-100 text-primary-700 text-sm px-3 py-1 rounded-full">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             <button
               onClick={handleLike}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                blog.isLiked ? "bg-red-50 text-red-600" : "bg-gray-50 text-gray-600 hover:bg-red-50 hover:text-red-600"
-              }`}
+              className={`flex items-center gap-3 h-12 px-6 rounded-2xl transition-all duration-300 font-bold text-sm ${blog.isLiked
+                  ? "bg-red-500 text-white shadow-xl shadow-red-500/20"
+                  : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white"
+                }`}
             >
               <Heart className={`w-4 h-4 ${blog.isLiked ? "fill-current" : ""}`} />
-              <span>{blog.likes}</span>
+              <span>{blog.likes} Hearts</span>
             </button>
 
             <button
               onClick={handleWishlist}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                blog.isWishlisted
-                  ? "bg-primary-50 text-primary-600"
-                  : "bg-gray-50 text-gray-600 hover:bg-primary-50 hover:text-primary-600"
-              }`}
+              className={`flex items-center gap-3 h-12 px-6 rounded-2xl transition-all duration-300 font-bold text-sm border ${blog.isWishlisted
+                  ? "bg-primary border-primary text-white shadow-xl shadow-primary/20"
+                  : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
+                }`}
             >
-              <Plus className="w-4 h-4" />
-              <span>{blog.isWishlisted ? "Added to Wishlist" : "Add to Wishlist"}</span>
+              <Plus className={`w-4 h-4 transition-transform duration-500 ${blog.isWishlisted ? 'rotate-45' : ''}`} />
+              <span>{blog.isWishlisted ? "In Sanctuary" : "Add to Sanctuary"}</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Blog content */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: blog.content }} />
-      </div>
+      <article className="glass-card p-10 border-white/5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -mr-32 -mt-32 rounded-full" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/5 blur-[100px] -ml-32 -mb-32 rounded-full" />
+
+        <div
+          className="prose prose-invert prose-lg max-w-none relative z-10 
+            prose-headings:font-black prose-headings:tracking-tight 
+            prose-p:text-white/70 prose-p:leading-relaxed 
+            prose-strong:text-white prose-strong:font-black
+            prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+            prose-img:rounded-3xl prose-img:border prose-img:border-white/10"
+          dangerouslySetInnerHTML={{ __html: blog.content }}
+        />
+      </article>
     </div>
   )
 }
+

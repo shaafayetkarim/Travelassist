@@ -10,14 +10,14 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function GET(request: NextRequest) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    
+
 
     // Strict format enforcement
     const prompt = `You are a travel content generator.
 Give me a random tourist destination or city from anywhere in the world.
-Avoid repeating popular cities from EVERY COUNTRY THE OTHER COUNTREY AND THE OTHER SUB CONTINENT AND THE OTHER COUNTRY...I WANT U REALLY TO RANDOMIZE THE COUNTRY AND LOCATIONS..SO THE CURRENT TIMES SECONDS WLL BE A DIFFERENT COUNTRY.. Here is a random number for variety: ${Math.random()*10000}.
+Avoid repeating popular cities from EVERY COUNTRY THE OTHER COUNTREY AND THE OTHER SUB CONTINENT AND THE OTHER COUNTRY...I WANT U REALLY TO RANDOMIZE THE COUNTRY AND LOCATIONS..SO THE CURRENT TIMES SECONDS WLL BE A DIFFERENT COUNTRY.. Here is a random number for variety: ${Math.random() * 10000}.
 
 Output must follow this EXACT format:
 Line 1: City, Country

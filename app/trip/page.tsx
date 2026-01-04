@@ -4,11 +4,12 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Calendar, DollarSign, MapPin, Users, Eye, EyeOff, Clock } from "lucide-react"
+import { Calendar, DollarSign, MapPin, Users, Eye, EyeOff, Clock, Sparkles, Rocket } from "lucide-react"
 import { Button } from "@/components/button"
 import { Input } from "@/components/input"
 import { Label } from "@/components/label"
 import { apiCall } from "@/lib/api"
+import { useNotifications } from "@/lib/notification-context"
 
 interface Trip {
   id: string
@@ -86,6 +87,8 @@ export default function Trip() {
     description: string
   } | null>(null)
 
+  const { addNotification } = useNotifications()
+
   useEffect(() => {
     if (activeTab === "joinable") {
       fetchJoinableTrips()
@@ -159,8 +162,11 @@ export default function Trip() {
 
       if (response.ok) {
         const data = await response.json()
-        // Redirect to the new trip page
-        window.location.href = `/trip/${data.trip.id}`
+        addNotification(`Success! Trip to ${formData.destination} created. A confirmation email has been sent to you.`)
+        // Redirect after a short delay
+        setTimeout(() => {
+          window.location.href = `/trip/${data.trip.id}`
+        }, 1500)
       } else {
         const data = await response.json()
         setError(data.error || "Failed to create trip")
@@ -176,7 +182,7 @@ export default function Trip() {
     try {
       setAiSuggestionLoading(true)
       setDestinationSuggestion(null)
-      
+
       const response = await apiCall("/api/destinations/random")
 
       if (!response) return
@@ -204,11 +210,11 @@ export default function Trip() {
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "ongoing":
-        return "bg-green-100 text-green-800"
+        return "bg-green-500/20 text-green-400 border-green-500/30"
       case "ended":
-        return "bg-gray-100 text-gray-800"
+        return "bg-white/5 text-white/40 border-white/10"
       default:
-        return "bg-blue-100 text-blue-800"
+        return "bg-primary/20 text-primary-400 border-primary/30"
     }
   }
 
@@ -232,351 +238,271 @@ export default function Trip() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Trip</h1>
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="flex items-center gap-4 mb-12">
+        <div className="w-12 h-12 bg-primary/20 rounded-2xl flex items-center justify-center border border-primary/30">
+          <Sparkles className="text-primary w-6 h-6" />
+        </div>
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight text-gradient">Your Travels</h1>
+          <p className="text-white/40 text-sm">Plan, track, and explore your next adventures.</p>
+        </div>
+      </div>
 
-      <div className="mb-8">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTab("create")}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "create"
-                  ? "border-primary-500 text-primary-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+      <div className="mb-12">
+        <div className="bg-white/5 p-1 rounded-2xl border border-white/10 flex gap-2 w-fit">
+          {[
+            { id: "create", label: "Create Trip" },
+            { id: "my-trips", label: "My Trips" },
+            { id: "joinable", label: "Joinable Trips" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-6 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === tab.id
+                ? "bg-white/10 text-white shadow-lg"
+                : "text-white/40 hover:text-white hover:bg-white/5"
+                }`}
             >
-              Create Trip
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTab("my-trips")}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "my-trips"
-                  ? "border-primary-500 text-primary-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              My Trips
-              {myTripsData && (
-                <span className="ml-2 bg-primary-100 text-primary-600 text-xs px-2 py-1 rounded-full">
+              {tab.label}
+              {tab.id === "my-trips" && myTripsData && (
+                <span className="ml-2 bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded-full border border-primary/30">
                   {myTripsData.stats.total}
                 </span>
               )}
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTab("joinable")}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "joinable"
-                  ? "border-primary-500 text-primary-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              Joinable Trips
-            </Button>
-          </nav>
+            </button>
+          ))}
         </div>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800">{error}</p>
+        <div className="mb-6 p-4 glass border-red-500/20 rounded-2xl bg-red-500/5 animate-in slide-in-from-top-2">
+          <p className="text-red-400 text-sm flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+            {error}
+          </p>
         </div>
       )}
 
       {activeTab === "create" && (
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Create New Trip</h2>
+        <div className="glass-card max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-purple-500/5">
+          <h2 className="text-xl font-bold mb-8 flex items-center gap-2">
+            <span className="w-1 h-6 bg-primary rounded-full"></span>
+            New Adventure Details
+          </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Destination</Label>
-              <div className="space-y-3">
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-white/40 ml-1">Destination</Label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5" />
+                  <input
                     type="text"
                     name="destination"
                     value={formData.destination}
                     onChange={handleInputChange}
-                    placeholder="Enter destination manually..."
-                    className="w-full pl-10 pr-4 py-3"
+                    placeholder="Where to next?"
+                    className="glass-input w-full pl-12 h-12"
                     required
                   />
                 </div>
-                <Button
+                <button
                   type="button"
                   onClick={getAIDestinationSuggestion}
                   disabled={aiSuggestionLoading}
-                  className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 disabled:opacity-50"
+                  className="glass-button h-12 sm:w-fit whitespace-nowrap bg-gradient-to-br from-purple-600/20 to-pink-500/20 border-primary/20 text-primary-400"
                 >
-                  {aiSuggestionLoading ? (
-                    <>
-                      <svg className="animate-spin w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      <span>Getting Suggestion...</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      <span>Surprise Me</span>
-                    </>
-                  )}
-                </Button>
-                
-                {destinationSuggestion && (
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4 mt-4">
-                    <h4 className="font-semibold text-lg text-gray-900 mb-2">
-                      {destinationSuggestion.destination}
-                    </h4>
-                    <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
-                      {destinationSuggestion.description}
-                    </p>
-                  </div>
-                )}
+                  <Sparkles className={`w-4 h-4 ${aiSuggestionLoading ? "animate-spin" : ""}`} />
+                  {aiSuggestionLoading ? "Thinking..." : "AI Suggest"}
+                </button>
               </div>
+
+              {destinationSuggestion && (
+                <div className="p-5 bg-white/5 rounded-2xl border border-white/10 mt-4 animate-in zoom-in-95 duration-300">
+                  <h4 className="font-bold text-white mb-2 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-yellow-400" />
+                    {destinationSuggestion.destination}
+                  </h4>
+                  <p className="text-white/60 text-sm leading-relaxed italic">
+                    {destinationSuggestion.description}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-2">Start Date</Label>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-white/40 ml-1">Dates</Label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input
+                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5" />
+                  <input
                     type="date"
                     name="startDate"
                     value={formData.startDate}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3"
+                    className="glass-input w-full pl-12 h-12 [color-scheme:dark]"
                     required
                   />
                 </div>
               </div>
-
-              <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-2">End Date</Label>
+              <div className="space-y-2 pt-2 md:pt-6">
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <Input
+                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5" />
+                  <input
                     type="date"
                     name="endDate"
                     value={formData.endDate}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3"
+                    className="glass-input w-full pl-12 h-12 [color-scheme:dark]"
                     required
                   />
                 </div>
               </div>
             </div>
 
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Budget Range</Label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  type="text"
-                  name="budget"
-                  value={formData.budget}
-                  onChange={handleInputChange}
-                  placeholder="e.g., $500-800"
-                  className="w-full pl-10 pr-4 py-3"
-                  required
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-white/40 ml-1">Budget</Label>
+                <div className="relative">
+                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5" />
+                  <input
+                    type="text"
+                    name="budget"
+                    value={formData.budget}
+                    onChange={handleInputChange}
+                    placeholder="e.g. $500 - $1000"
+                    className="glass-input w-full pl-12 h-12"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold uppercase tracking-wider text-white/40 ml-1">Capacity</Label>
+                <div className="relative">
+                  <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5" />
+                  <input
+                    type="number"
+                    name="maxParticipants"
+                    value={formData.maxParticipants}
+                    onChange={handleInputChange}
+                    min="2"
+                    max="20"
+                    className="glass-input w-full pl-12 h-12"
+                  />
+                </div>
               </div>
             </div>
 
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Description & Safety Tips (Optional)</Label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Tell others about your trip plans..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                rows={3}
-              />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors cursor-pointer" onClick={() => handleInputChange({ target: { name: "isPublic", type: "checkbox", checked: !formData.isPublic } } as any)}>
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${formData.isPublic ? "bg-green-500/20 text-green-400" : "bg-white/5 text-white/40"}`}>
+                    {formData.isPublic ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">Public Explorer Mode</p>
+                    <p className="text-[10px] text-white/40 uppercase tracking-widest">Visibility</p>
+                  </div>
+                </div>
+                <div className={`w-10 h-6 rounded-full p-1 transition-colors ${formData.isPublic ? "bg-primary" : "bg-white/10"}`}>
+                  <div className={`w-4 h-4 bg-white rounded-full transition-transform ${formData.isPublic ? "translate-x-4" : "translate-x-0"}`} />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Max Participants</Label>
-              <Input
-                type="number"
-                name="maxParticipants"
-                value={formData.maxParticipants}
-                onChange={handleInputChange}
-                min="2"
-                max="20"
-                className="w-full px-4 py-3"
-              />
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="isPublic"
-                checked={formData.isPublic}
-                onChange={handleInputChange}
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-              />
-              <Label className="ml-2 block text-sm text-gray-700">Make this trip public (others can join)</Label>
-              {formData.isPublic ? (
-                <Eye className="ml-2 w-4 h-4 text-green-500" />
-              ) : (
-                <EyeOff className="ml-2 w-4 h-4 text-gray-400" />
-              )}
-            </div>
-
-            <Button
+            <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black text-white py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors font-medium disabled:opacity-50"
+              className="w-full h-14 bg-primary text-white text-lg font-bold rounded-2xl hover:bg-primary-hover hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50"
             >
-              {loading ? "Creating Trip..." : "Create Trip"}
-            </Button>
+              {loading ? (
+                <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Rocket className="w-6 h-6" />
+                  Launch Trip
+                </>
+              )}
+            </button>
           </form>
         </div>
       )}
 
       {activeTab === "my-trips" && (
-        <div>
-          <div className="mb-6 flex flex-wrap gap-2">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="mb-8 flex flex-wrap gap-2">
             {[
-              { key: "all", label: "All Trips", count: myTripsData?.stats.total },
-              { key: "created", label: "Created by Me", count: myTripsData?.stats.created },
-              { key: "joined", label: "Joined", count: myTripsData?.stats.joined },
-              { key: "upcoming", label: "Upcoming", count: myTripsData?.stats.upcoming },
-              { key: "ongoing", label: "Ongoing", count: myTripsData?.stats.ongoing },
-              { key: "completed", label: "Completed", count: myTripsData?.stats.completed },
+              { key: "all", label: "All" },
+              { key: "created", label: "Mine" },
+              { key: "joined", label: "Joined" },
+              { key: "upcoming", label: "Upcoming" },
+              { key: "ongoing", label: "Ongoing" },
+              { key: "completed", label: "Completed" },
             ].map((filter) => (
-              <Button
+              <button
                 key={filter.key}
-                variant="ghost"
                 onClick={() => setMyTripsFilter(filter.key)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  myTripsFilter === filter.key ? "bg-black text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all border ${myTripsFilter === filter.key
+                  ? "bg-white/10 text-white border-white/20"
+                  : "text-white/40 border-transparent hover:text-white"
+                  }`}
               >
                 {filter.label}
-                {filter.count !== undefined && filter.count > 0 && (
-                  <span className="ml-2 text-xs">({filter.count})</span>
-                )}
-              </Button>
+              </button>
             ))}
           </div>
 
           {myTripsLoading ? (
-            <div className="grid gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-lg shadow-sm border p-6 animate-pulse">
-                  <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div className="h-4 bg-gray-200 rounded"></div>
-                    <div className="h-4 bg-gray-200 rounded"></div>
-                  </div>
-                  <div className="flex space-x-3">
-                    <div className="h-10 bg-gray-200 rounded w-24"></div>
-                    <div className="h-10 bg-gray-200 rounded w-24"></div>
-                  </div>
-                </div>
+                <div key={i} className="glass-card h-64 animate-pulse" />
               ))}
             </div>
           ) : getFilteredTrips().length === 0 ? (
-            <div className="text-center py-16">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {myTripsFilter === "all" ? "No trips yet" : `No ${myTripsFilter} trips`}
-              </h3>
-              <p className="text-gray-600">
-                {myTripsFilter === "created"
-                  ? "Create your first trip to get started!"
-                  : myTripsFilter === "joined"
-                    ? "Join some trips to see them here!"
-                    : "Your trips will appear here based on their status."}
-              </p>
+            <div className="glass-card py-20 text-center flex flex-col items-center justify-center gap-4">
+              <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
+                <Rocket className="w-8 h-8 text-white/20" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold">No trips found</h3>
+                <p className="text-white/40 text-sm">Ready to start your first journey?</p>
+              </div>
+              <button onClick={() => setActiveTab("create")} className="text-primary text-sm font-bold underline underline-offset-4">Create one now</button>
             </div>
           ) : (
-            <div className="grid gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {getFilteredTrips().map((trip) => (
-                <div key={trip.id} className="bg-white rounded-lg shadow-sm border p-6">
-                  <div className="flex justify-between items-start mb-4">
+                <div key={trip.id} className="glass-card group hover:scale-[1.02]">
+                  <div className="flex justify-between items-start mb-6">
                     <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-semibold text-gray-900">{trip.destination}</h3>
-                        {trip.status && (
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(trip.status)}`}>
-                            {trip.status}
-                          </span>
-                        )}
-                        {trip.isCreator && (
-                          <span className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
-                            Creator
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-gray-600">
-                        {trip.isCreator ? "Created by you" : `Created by ${trip.creator.name}`}
+                      <h3 className="text-lg font-bold group-hover:text-primary transition-colors">{trip.destination}</h3>
+                      <p className="text-[10px] text-white/40 uppercase tracking-widest mt-1">
+                        {trip.isCreator ? "Created by you" : `By ${trip.creator.name}`}
                       </p>
-                      {trip.description && <p className="text-gray-600 text-sm mt-1">{trip.description}</p>}
                     </div>
-                    <div className="text-right">
-                      <div className="flex items-center text-sm text-gray-500 mb-2">
-                        <Users className="w-4 h-4 mr-1" />
-                        {trip.participantCount}/{trip.maxParticipants} joined
-                      </div>
-                      {!trip.isPublic && (
-                        <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded-full">
-                          Private
-                        </span>
-                      )}
-                    </div>
+                    <span className={`px-2 py-1 rounded-lg text-[10px] font-bold border ${getStatusColor(trip.status || "")}`}>
+                      {trip.status || "Upcoming"}
+                    </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div className="flex items-center text-gray-600">
-                      <Calendar className="w-4 h-4 mr-2" />
+                  <div className="space-y-4 mb-8">
+                    <div className="flex items-center gap-3 text-white/60 text-sm">
+                      <Calendar className="w-4 h-4 text-primary" />
                       {formatDateRange(trip.startDate, trip.endDate)}
                     </div>
-                    <div className="flex items-center text-gray-600">
-                      <DollarSign className="w-4 h-4 mr-2" />
-                      {trip.budget}
-                    </div>
-                    <div className="flex items-center text-gray-600">
-                      <Clock className="w-4 h-4 mr-2" />
-                      Role: {trip.userRole}
+                    <div className="flex items-center gap-3 text-white/60 text-sm">
+                      <Users className="w-4 h-4 text-primary" />
+                      {trip.participantCount} / {trip.maxParticipants} Explorers
                     </div>
                   </div>
 
-                  {trip.todoStats && trip.todoStats.total > 0 && (
-                    <div className="mb-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-gray-700">Trip Progress</span>
-                        <span className="text-sm text-gray-600">
-                          {trip.todoStats.completed}/{trip.todoStats.total} activities completed
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-black h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${trip.progress}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex space-x-3">
-                    <Button
-                      onClick={() => (window.location.href = `/trip/${trip.id}`)}
-                      className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-                    >
-                      View Details
-                    </Button>
-                    
-                  </div>
+                  <button
+                    onClick={() => (window.location.href = `/trip/${trip.id}`)}
+                    className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-bold transition-all"
+                  >
+                    Manage Adventure
+                  </button>
                 </div>
               ))}
             </div>
@@ -585,67 +511,50 @@ export default function Trip() {
       )}
 
       {activeTab === "joinable" && (
-        <div>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           {tripsLoading ? (
-            <div className="grid gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-lg shadow-sm border p-6 animate-pulse">
-                  <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div className="h-4 bg-gray-200 rounded"></div>
-                    <div className="h-4 bg-gray-200 rounded"></div>
-                  </div>
-                  <div className="flex space-x-3">
-                    <div className="h-10 bg-gray-200 rounded w-24"></div>
-                    <div className="h-10 bg-gray-200 rounded w-24"></div>
-                  </div>
-                </div>
+                <div key={i} className="glass-card h-64 animate-pulse" />
               ))}
             </div>
           ) : joinableTrips.length === 0 ? (
-            <div className="text-center py-16">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No trips available</h3>
-              <p className="text-gray-600">Be the first to create a public trip!</p>
+            <div className="glass-card py-20 text-center flex flex-col items-center justify-center gap-4">
+              <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
+                <MapPin className="w-8 h-8 text-white/20" />
+              </div>
+              <p className="text-white/40 font-medium">No public expeditions available right now.</p>
             </div>
           ) : (
-            <div className="grid gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {joinableTrips.map((trip) => (
-                <div key={trip.id} className="bg-white rounded-lg shadow-sm border p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-900">{trip.destination}</h3>
-                      <p className="text-gray-600">Created by {trip.creator.name}</p>
-                      {trip.description && <p className="text-gray-600 text-sm mt-1">{trip.description}</p>}
-                    </div>
-                    <div className="text-right">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Users className="w-4 h-4 mr-1" />
-                        {trip.participantCount}/{trip.maxParticipants} joined
-                      </div>
+                <div key={trip.id} className="glass-card group hover:scale-[1.02]">
+                  <div className="flex justify-between items-start mb-6">
+                    <h3 className="text-lg font-bold group-hover:text-primary transition-colors">{trip.destination}</h3>
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
+                      <Users className="w-4 h-4 text-white/60" />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div className="flex items-center text-gray-600">
-                      <Calendar className="w-4 h-4 mr-2" />
+                  <div className="space-y-4 mb-8">
+                    <p className="text-white/40 text-xs line-clamp-2 italic h-8">
+                      {trip.description || "No description provided."}
+                    </p>
+                    <div className="flex items-center gap-3 text-white/60 text-sm">
+                      <Calendar className="w-4 h-4 text-primary" />
                       {formatDateRange(trip.startDate, trip.endDate)}
                     </div>
-                    <div className="flex items-center text-gray-600">
-                      <DollarSign className="w-4 h-4 mr-2" />
-                      {trip.budget}
-                    </div>
                   </div>
 
-                  <div className="flex space-x-3">
-                    <Button
-                      onClick={() => (window.location.href = `/trip/${trip.id}`)}
-                      className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-                    >
-                      View Details
-                    </Button>
-                    
-                  </div>
+                  <button
+                    onClick={() => (window.location.href = `/trip/${trip.id}`)}
+                    className="w-full py-3 bg-primary text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-primary/20 transition-all"
+                  >
+                    Join Expedition
+                  </button>
+                  <p className="text-[9px] text-center text-white/20 mt-4 uppercase tracking-widest">
+                    Expedition Lead: {trip.creator.name}
+                  </p>
                 </div>
               ))}
             </div>

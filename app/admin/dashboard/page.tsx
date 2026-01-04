@@ -133,237 +133,204 @@ export default function AdminDashboard() {
   }
 
   if (!adminUser) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+    return (
+      <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary border-r-2 border-r-transparent"></div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0a0a0c] text-white selection:bg-primary/30">
       {/* Admin Header */}
-      <div className="bg-white shadow-sm border-b">
+      <header className="sticky top-0 z-50 bg-[#0a0a0c]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <Shield className="w-8 h-8 text-red-600" />
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-red-500/10 rounded-xl border border-red-500/20 flex items-center justify-center">
+                <Shield className="w-6 h-6 text-red-500" />
+              </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-sm text-gray-500">Travel Buddy Management</p>
+                <h1 className="text-xl font-black tracking-tight uppercase">Command Center</h1>
+                <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">Travel Buddy Authority</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Welcome, {adminUser.name}</span>
-              <Button onClick={handleLogout} variant="outline" className="flex items-center space-x-2 bg-transparent">
-                <LogOut className="w-4 h-4" />
+            <div className="flex items-center gap-6">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-bold">{adminUser.name}</p>
+                <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">Root Administrator</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="glass-button text-xs h-10 px-6 bg-white/5 border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 shadow-none"
+              >
+                <LogOut className="w-3.5 h-3.5" />
                 <span>Logout</span>
-              </Button>
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center">
-              <Users className="w-8 h-8 text-blue-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          {[
+            { label: "Total Users", value: stats.totalUsers, icon: Users, color: "blue" },
+            { label: "Premium Tier", value: stats.premiumUsers, icon: Crown, color: "amber" },
+            { label: "Regular Tier", value: stats.regularUsers, icon: UserCheck, color: "slate" },
+            { label: "Active Nodes", value: stats.activeUsers, icon: UserX, color: "emerald" },
+          ].map((stat) => (
+            <div key={stat.label} className="glass-card p-6 border-white/5 group hover:border-white/10 transition-colors">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-12 h-12 rounded-2xl bg-${stat.color}-500/10 border border-${stat.color}-500/20 flex items-center justify-center`}>
+                  <stat.icon className={`w-6 h-6 text-${stat.color}-500`} />
+                </div>
+                <div className="w-8 h-1 bg-white/5 rounded-full" />
               </div>
+              <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
+              <p className="text-3xl font-black tracking-tight">{stat.value}</p>
             </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center">
-              <Crown className="w-8 h-8 text-yellow-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Premium Users</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.premiumUsers}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center">
-              <UserCheck className="w-8 h-8 text-gray-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Regular Users</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.regularUsers}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center">
-              <UserX className="w-8 h-8 text-green-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Users</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeUsers}</p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* User Management */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">User Management</h2>
-          </div>
+        {/* User Management Section */}
+        <section className="space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <h2 className="text-2xl font-black tracking-tight mb-2">Entity Registry</h2>
+              <p className="text-sm text-white/40 font-medium">Monitor and manage all system participants.</p>
+            </div>
 
-          {/* Filters and Search */}
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <div className="flex space-x-2">
-                <Button
-                  variant={filterType === "all" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterType("all")}
-                  className={filterType === "all" ? "bg-black text-white" : "bg-transparent"}
-                >
-                  All Users
-                </Button>
-                <Button
-                  variant={filterType === "premium" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterType("premium")}
-                  className={filterType === "premium" ? "bg-black text-white" : "bg-transparent"}
-                >
-                  <Crown className="w-4 h-4 mr-1" />
-                  Premium
-                </Button>
-                <Button
-                  variant={filterType === "regular" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterType("regular")}
-                  className={filterType === "regular" ? "bg-black text-white" : "bg-transparent"}
-                >
-                  Regular
-                </Button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="bg-white/5 p-1 rounded-xl border border-white/10 flex gap-1">
+                {["all", "premium", "regular"].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setFilterType(type)}
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filterType === type
+                      ? "bg-white/10 text-white shadow-lg"
+                      : "text-white/30 hover:text-white"
+                      }`}
+                  >
+                    {type}
+                  </button>
+                ))}
               </div>
-
-              <div className="w-full sm:w-64">
-                <Input
+              <div className="relative group min-w-[280px]">
+                <input
                   type="text"
-                  placeholder="Search users..."
+                  placeholder="Search entities..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full"
+                  className="glass-input w-full h-11 pl-4"
                 />
               </div>
             </div>
           </div>
 
-          {/* Users Table */}
-          {loading ? (
-            <div className="p-6">
-              <div className="animate-pulse space-y-4">
+          <div className="glass-card p-0 overflow-hidden border-white/5">
+            {loading ? (
+              <div className="p-8 space-y-4">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="flex items-center space-x-4">
-                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/6"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/8"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/6"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                  </div>
+                  <div key={i} className="h-12 bg-white/2 rounded-xl animate-pulse" />
                 ))}
               </div>
-            </div>
-          ) : error ? (
-            <div className="p-6 text-center">
-              <p className="text-red-600 mb-4">{error}</p>
-              <Button onClick={fetchUsers} className="bg-black text-white">
-                Try Again
-              </Button>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      User
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Trips
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Join Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 flex items-center">
-                            {user.name}
-                            {user.isPremium && <Crown className="w-4 h-4 text-yellow-500 ml-2" />}
-                          </div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            user.isPremium ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {user.isPremium ? "Premium" : "Regular"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.tripsCompleted}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(user.joinDate).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => togglePremium(user.id, user.isPremium)}
-                            className="flex items-center space-x-1 hover:bg-yellow-50"
-                          >
-                            {user.isPremium ? (
-                              <ToggleRight className="w-4 h-4 text-yellow-600" />
-                            ) : (
-                              <ToggleLeft className="w-4 h-4 text-gray-400" />
-                            )}
-                            <span className="text-xs">{user.isPremium ? "Downgrade" : "Upgrade"}</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteUser(user.id)}
-                            className="flex items-center space-x-1 hover:bg-red-50 text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            <span className="text-xs">Delete</span>
-                          </Button>
-                        </div>
-                      </td>
+            ) : error ? (
+              <div className="p-20 text-center flex flex-col items-center gap-6">
+                <p className="text-red-400 font-medium">{error}</p>
+                <button onClick={fetchUsers} className="glass-button bg-white text-black border-transparent">
+                  Retry Initialization
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-white/5 bg-white/[0.02]">
+                      <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Entity Details</th>
+                      <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Classification</th>
+                      <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Throughput</th>
+                      <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Uptime</th>
+                      <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 text-right">Directives</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {users.map((user) => (
+                      <tr key={user.id} className="group hover:bg-white/[0.02] transition-colors">
+                        <td className="px-8 py-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white/10 to-transparent border border-white/10 flex items-center justify-center text-sm font-bold">
+                              {user.name.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="font-bold flex items-center gap-2">
+                                {user.name}
+                                {user.isPremium && <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
+                              </div>
+                              <div className="text-xs text-white/20 font-medium">{user.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-8 py-6">
+                          <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${user.isPremium
+                            ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                            : "bg-white/5 text-white/40 border-white/10"
+                            }`}>
+                            {user.isPremium ? "Premium" : "Regular"}
+                          </span>
+                        </td>
+                        <td className="px-8 py-6">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold">{user.tripsCompleted}</span>
+                            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Trips</span>
+                          </div>
+                        </td>
+                        <td className="px-8 py-6">
+                          <span className="text-xs font-medium text-white/40">
+                            {new Date(user.joinDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                        </td>
+                        <td className="px-8 py-6">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => togglePremium(user.id, user.isPremium)}
+                              title={user.isPremium ? "Downgrade Authority" : "Escalate Authority"}
+                              className={`p-2 rounded-lg border transition-all ${user.isPremium
+                                ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
+                                : "bg-white/5 border-white/10 text-white/20 hover:text-white"
+                                }`}
+                            >
+                              {user.isPremium ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+                            </button>
+                            <button
+                              onClick={() => deleteUser(user.id)}
+                              title="Terminate Entity"
+                              className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-lg shadow-red-500/5"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
-          {users.length === 0 && !loading && !error && (
-            <div className="text-center py-12">
-              <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
-              <p className="text-gray-500">Try adjusting your search or filter criteria.</p>
-            </div>
-          )}
-        </div>
-      </div>
+            {users.length === 0 && !loading && !error && (
+              <div className="py-24 text-center">
+                <div className="flex flex-col items-center gap-6 opacity-30">
+                  <Users className="w-12 h-12" />
+                  <p className="font-bold tracking-[0.2em] uppercase text-sm">No entities registered in this sector</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
     </div>
   )
 }
+

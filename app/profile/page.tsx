@@ -4,7 +4,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { User, Mail, Phone, MapPin, Lock, Star, Edit } from "lucide-react"
+import { User, Mail, Phone, MapPin, Lock, Star, Edit, Clock } from "lucide-react"
 import { Button } from "@/components/button"
 import { Input } from "@/components/input"
 import { Label } from "@/components/label"
@@ -170,7 +170,7 @@ export default function Profile() {
         body: JSON.stringify({
           tripId,
           rating,
-          reviewType:"TRIP",
+          reviewType: "TRIP",
         }),
       })
 
@@ -209,11 +209,11 @@ export default function Profile() {
           completedTrips.map((trip) =>
             trip.id === tripId
               ? {
-                  ...trip,
-                  participants: trip.participants.map((participant) =>
-                    participant.id === buddyId ? { ...participant, rating } : participant,
-                  ),
-                }
+                ...trip,
+                participants: trip.participants.map((participant) =>
+                  participant.id === buddyId ? { ...participant, rating } : participant,
+                ),
+              }
               : trip,
           ),
         )
@@ -229,20 +229,10 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i}>
-                  <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
-                  <div className="h-10 bg-gray-200 rounded"></div>
-                </div>
-              ))}
-            </div>
-          </div>
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="animate-pulse space-y-8">
+          <div className="h-10 bg-white/5 rounded-2xl w-1/4 border border-white/10"></div>
+          <div className="glass-card h-96 animate-pulse" />
         </div>
       </div>
     )
@@ -250,308 +240,297 @@ export default function Profile() {
 
   if (error || !profileData) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center py-16">
-          <p className="text-red-600 mb-4">{error || "Failed to load profile"}</p>
-          <Button onClick={fetchProfile} className="bg-black text-white">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="glass-card text-center py-16 flex flex-col items-center gap-6">
+          <p className="text-red-400 font-medium">{error || "Failed to load profile"}</p>
+          <button onClick={fetchProfile} className="glass-button bg-primary text-white border-primary/20">
             Try Again
-          </Button>
+          </button>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-        {profileData.isPremium && null}
+    <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="flex items-center justify-between mb-12">
+        <h1 className="text-4xl font-extrabold tracking-tight text-gradient">Your Profile</h1>
+        {profileData.isPremium && (
+          <span className="bg-amber-500/10 text-amber-400 text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full border border-amber-500/20 shadow-lg shadow-amber-500/10">
+            Premium Member
+          </span>
+        )}
       </div>
 
-      <div className="mb-8">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTab("profile")}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "profile"
-                  ? "border-primary-500 text-primary-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+      <div className="mb-12">
+        <div className="bg-white/5 p-1 rounded-2xl border border-white/10 flex gap-2 w-fit">
+          {[
+            { id: "profile", label: "Profile" },
+            { id: "password", label: "Security" },
+            { id: "reviews", label: "Ratings" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-6 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === tab.id
+                ? "bg-white/10 text-white shadow-lg"
+                : "text-white/40 hover:text-white hover:bg-white/5"
+                }`}
             >
-              Profile Info
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTab("password")}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "password"
-                  ? "border-primary-500 text-primary-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              Change Password
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTab("reviews")}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "reviews"
-                  ? "border-primary-500 text-primary-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              Reviews & Ratings
-            </Button>
-          </nav>
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
       {activeTab === "profile" && (
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Profile Information</h2>
-            <Button
+        <div className="glass-card animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex justify-between items-center mb-10">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-primary rounded-full"></span>
+              Personal Details
+            </h2>
+            <button
               onClick={() => setIsEditing(!isEditing)}
-              variant="outline"
-              className="flex items-center space-x-2 bg-transparent"
+              className={`glass-button text-xs h-10 px-6 ${isEditing ? "bg-red-500/20 text-red-400 border-red-500/30" : "bg-white/5 text-white/60 border-white/10"}`}
             >
-              <Edit className="w-4 h-4" />
-              <span>{isEditing ? "Cancel" : "Edit"}</span>
-            </Button>
+              <Edit className="w-3.5 h-3.5" />
+              <span>{isEditing ? "Cancel" : "Edit Profile"}</span>
+            </button>
           </div>
 
-          <form onSubmit={handleProfileSubmit} className="space-y-6">
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Full Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
+          <form onSubmit={handleProfileSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/20 ml-1">Full Name</label>
+              <div className="relative group">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5 group-focus-within:text-primary transition-colors" />
+                <input
                   type="text"
                   name="name"
                   value={editData.name || ""}
                   onChange={handleProfileChange}
                   disabled={!isEditing}
-                  className="w-full pl-10 pr-4 py-3"
+                  className="glass-input w-full pl-12 h-12"
                 />
               </div>
             </div>
 
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input type="email" value={profileData.email} disabled className="w-full pl-10 pr-4 py-3 bg-gray-50" />
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/20 ml-1">Email Address</label>
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 w-5 h-5" />
+                <input
+                  type="email"
+                  value={profileData.email}
+                  disabled
+                  className="glass-input w-full pl-12 h-12 opacity-50 cursor-not-allowed bg-white/2"
+                />
               </div>
-              <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
             </div>
 
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/20 ml-1">Phone Number</label>
+              <div className="relative group">
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5 group-focus-within:text-primary transition-colors" />
+                <input
                   type="tel"
                   name="phone"
                   value={editData.phone || ""}
                   onChange={handleProfileChange}
                   disabled={!isEditing}
-                  className="w-full pl-10 pr-4 py-3"
-                  placeholder="Enter your phone number"
+                  className="glass-input w-full pl-12 h-12"
+                  placeholder="+1 (555) 000-0000"
                 />
               </div>
             </div>
 
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Location</Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/20 ml-1">Base Location</label>
+              <div className="relative group">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-5 h-5 group-focus-within:text-primary transition-colors" />
+                <input
                   type="text"
                   name="location"
                   value={editData.location || ""}
                   onChange={handleProfileChange}
                   disabled={!isEditing}
-                  className="w-full pl-10 pr-4 py-3"
-                  placeholder="Enter your location"
+                  className="glass-input w-full pl-12 h-12"
+                  placeholder="e.g. London, UK"
                 />
               </div>
             </div>
 
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Travel Interests</Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
-                <Textarea
-                  name="interests"
-                  value={editData.interests || ""}
-                  onChange={handleProfileChange}
-                  disabled={!isEditing}
-                  rows={3}
-                  className="w-full pl-10 pr-4 py-3"
-                  placeholder="e.g., Adventure, Photography, Culture, Food"
-                />
-              </div>
+            <div className="md:col-span-2 space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/20 ml-1">Travel Interests</label>
+              <textarea
+                name="interests"
+                value={editData.interests || ""}
+                onChange={handleProfileChange}
+                disabled={!isEditing}
+                rows={3}
+                className="glass-input w-full p-4 resize-none min-h-[100px]"
+                placeholder="Adventure, Photography, Fine Dining..."
+              />
             </div>
 
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Bio</Label>
-              <Textarea
+            <div className="md:col-span-2 space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/20 ml-1">Traveler Bio</label>
+              <textarea
                 name="bio"
                 value={editData.bio || ""}
                 onChange={handleProfileChange}
                 disabled={!isEditing}
                 rows={4}
-                className="w-full px-4 py-3"
-                placeholder="Tell us about yourself and your travel experiences..."
+                className="glass-input w-full p-4 resize-none min-h-[120px]"
+                placeholder="Share your story..."
               />
             </div>
 
             {isEditing && (
-              <Button
-                type="submit"
-                className="w-full bg-black text-white py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors font-medium"
-              >
-                Update Profile
-              </Button>
+              <div className="md:col-span-2 pt-4">
+                <button
+                  type="submit"
+                  className="glass-button bg-primary text-white border-primary/20 w-full h-14 text-base font-bold shadow-xl shadow-primary/20"
+                >
+                  Save Profile Changes
+                </button>
+              </div>
             )}
           </form>
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-500">Member since {new Date(profileData.createdAt).toLocaleDateString()}</p>
+          <div className="mt-12 pt-8 border-t border-white/5 flex items-center gap-2">
+            <Clock className="w-4 h-4 text-white/20" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/20">
+              Exploring since {new Date(profileData.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+            </p>
           </div>
         </div>
       )}
 
       {activeTab === "password" && (
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Change Password</h2>
+        <div className="glass-card animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto">
+          <h2 className="text-xl font-bold mb-10 flex items-center gap-2">
+            <Lock className="w-5 h-5 text-primary" />
+            Security Settings
+          </h2>
 
-          <form onSubmit={handlePasswordSubmit} className="space-y-6">
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Current Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
+          <form onSubmit={handlePasswordSubmit} className="space-y-8">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/20 ml-1">Current Password</label>
+              <div className="relative group">
+                <input
                   type="password"
                   name="currentPassword"
                   value={passwordData.currentPassword}
                   onChange={handlePasswordChange}
-                  className="w-full pl-10 pr-4 py-3"
+                  className="glass-input w-full h-12"
                   required
                 />
               </div>
             </div>
 
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">New Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/20 ml-1">New Password</label>
+              <div className="relative group">
+                <input
                   type="password"
                   name="newPassword"
                   value={passwordData.newPassword}
                   onChange={handlePasswordChange}
-                  className="w-full pl-10 pr-4 py-3"
+                  className="glass-input w-full h-12"
                   required
                 />
               </div>
             </div>
 
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/20 ml-1">Confirm New Password</label>
+              <div className="relative group">
+                <input
                   type="password"
                   name="confirmPassword"
                   value={passwordData.confirmPassword}
                   onChange={handlePasswordChange}
-                  className="w-full pl-10 pr-4 py-3"
+                  className="glass-input w-full h-12"
                   required
                 />
               </div>
             </div>
 
-            <Button
+            <button
               type="submit"
-              className="w-full bg-black text-white py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors font-medium"
+              className="glass-button bg-primary text-white border-primary/20 w-full h-14 text-base font-bold mt-4 shadow-xl shadow-primary/20"
             >
-              Change Password
-            </Button>
+              Update Security Credentials
+            </button>
           </form>
         </div>
       )}
 
       {activeTab === "reviews" && (
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Reviews & Ratings</h2>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
+          <h2 className="text-xl font-bold mb-8 flex items-center gap-2">
+            <Star className="w-5 h-5 text-primary" />
+            Expedition Reviews
+          </h2>
 
           {completedTrips.length === 0 ? (
-            <div className="text-center py-12">
-              <Star className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No completed trips yet</h3>
-              <p className="text-gray-500">Complete some trips to leave reviews and ratings!</p>
+            <div className="glass-card py-20 text-center flex flex-col items-center gap-6">
+              <Star className="w-12 h-12 text-white/10" />
+              <div>
+                <h3 className="text-xl font-bold">No completed expeditions</h3>
+                <p className="text-white/40 text-sm">Your trip ratings and buddy reviews will appear here.</p>
+              </div>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="grid gap-6">
               {completedTrips.map((trip) => (
-                <div key={trip.id} className="border-b border-gray-200 pb-6 last:border-b-0">
-                  <div className="flex justify-between items-start mb-4">
+                <div key={trip.id} className="glass-card group">
+                  <div className="flex justify-between items-start mb-8">
                     <div>
-                      <h3 className="font-semibold text-gray-900">{trip.destination}</h3>
-                      <p className="text-gray-600">{new Date(trip.date).toLocaleDateString()}</p>
+                      <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{trip.destination}</h3>
+                      <p className="text-xs text-white/40 font-bold uppercase tracking-widest mt-1">
+                        Completed {new Date(trip.date).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Overall Experience</h4>
-                      <div className="flex items-center space-x-1">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div className="p-6 bg-white/2 rounded-2xl border border-white/5">
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-6">Overall Expedition Rating</h4>
+                      <div className="flex items-center gap-4">
                         {[...Array(5)].map((_, i) => (
-                          <Button
+                          <button
                             key={i}
-                            variant="ghost"
-                            className="text-yellow-400 hover:text-yellow-500 p-0"
+                            className="transition-transform hover:scale-125"
                             onClick={() => handleRateTrip(trip.id, i + 1, "DESTINATION")}
                           >
-                            <Star className={`w-5 h-5 ${i < trip.rating ? "fill-current" : ""}`} />
-                          </Button>
+                            <Star className={`w-8 h-8 ${i < trip.rating ? "fill-primary text-primary" : "text-white/10"}`} />
+                          </button>
                         ))}
                       </div>
                     </div>
 
                     {trip.participants.length > 0 && (
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-3">Rate Trip Buddies</h4>
-                        <div className="space-y-3">
+                      <div className="space-y-6">
+                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-white/40">Buddy Endorsements</h4>
+                        <div className="space-y-4">
                           {trip.participants.map((participant) => (
-                            <div key={participant.id} className="flex items-center justify-between">
-                              <div className="flex items-center space-x-2">
-                                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                                  {participant.avatar ? (
-                                    <img
-                                      src={participant.avatar || "/placeholder.svg"}
-                                      alt={participant.name}
-                                      className="w-8 h-8 rounded-full"
-                                    />
-                                  ) : (
-                                    <User className="w-4 h-4 text-gray-500" />
-                                  )}
+                            <div key={participant.id} className="flex items-center justify-between p-4 bg-white/2 rounded-2xl border border-white/5">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center border border-white/10">
+                                  <User className="w-5 h-5 text-white/40" />
                                 </div>
-                                <span className="text-sm font-medium text-gray-700">{participant.name}</span>
+                                <span className="text-sm font-bold">{participant.name}</span>
                               </div>
-                              <div className="flex items-center space-x-1">
+                              <div className="flex gap-1">
                                 {[...Array(5)].map((_, i) => (
-                                  <Button
+                                  <button
                                     key={i}
-                                    variant="ghost"
-                                    className="text-yellow-400 hover:text-yellow-500 p-0"
                                     onClick={() => handleRateBuddy(trip.id, participant.id, i + 1)}
                                   >
-                                    <Star className={`w-4 h-4 ${i < participant.rating ? "fill-current" : ""}`} />
-                                  </Button>
+                                    <Star className={`w-4 h-4 ${i < participant.rating ? "fill-primary text-primary" : "text-white/10"}`} />
+                                  </button>
                                 ))}
                               </div>
                             </div>
@@ -569,5 +548,6 @@ export default function Profile() {
     </div>
   )
 }
+
 
 
